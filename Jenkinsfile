@@ -92,18 +92,13 @@ pipeline {
         stage('Update Deployment File') {
             steps {
                 script {
-                    def creds = gitUsernamePassword(credentialsId: 'github', gitToolName: 'Default')
-                    if (creds) {
-                        withCredentials([creds]) {
-                            def NEW_IMAGE_NAME = "mamir32825/tetrisv1:latest"
-                            sh "sed -i 's|image: .*|image: ${NEW_IMAGE_NAME}|' deployment.yml"
-                            sh 'git add deployment.yml'
-                            sh "git commit -m 'Update deployment image to ${NEW_IMAGE_NAME}'"
-                            sh "git push https://${creds.username}:${creds.password}@github.com/${env.GIT_USER_NAME}/${env.GIT_REPO_NAME} HEAD:main"
+                    withCredentials([gitUsernamePassword(credentialsId: 'github', gitToolName: 'Default')]){
+                        NEW_IMAGE_NAME = "mamir32825/tetrisv1:latest"
+                        sh "sed -i 's|image: .*|image: ${NEW_IMAGE_NAME}|' deployment.yml"
+                        sh 'git add deployment.yml'
+                        sh "git commit -m 'Update deployment image to ${NEW_IMAGE_NAME}'"
+                        sh "git push @github.com/${GIT_USER_NAME}/${GIT_REPO_NAME">https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main"
                         }
-                    } else {
-                        error "Failed to retrieve GitHub credentials."
-                    }
                 }
             }
         }
