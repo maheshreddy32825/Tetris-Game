@@ -98,7 +98,7 @@ pipeline {
                         sh 'git add deployment.yml'
                         sh "git commit -m 'Update deployment image to ${NEW_IMAGE_NAME}'"
                         sh "git push @github.com/${GIT_USER_NAME}/${GIT_REPO_NAME">https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main"
-                        }
+                    }
                 }
             }
         }
