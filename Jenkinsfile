@@ -7,6 +7,7 @@ pipeline {
     }
     
     environment {
+        // define env
         SCANNER_HOME = tool 'sonar-scanner'
         GIT_REPO_NAME = "Tetris-deployment-file"
         GIT_USER_NAME = "maheshreddy32825"
