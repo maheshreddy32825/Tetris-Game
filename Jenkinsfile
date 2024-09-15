@@ -68,9 +68,9 @@ pipeline {
                 script {
                     // Build Docker image
                     withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
-                        sh "docker build -t ${DOCKER_IMAGE_NAME} ."
-                        sh "docker tag ${DOCKER_IMAGE_NAME} mamir32825/${DOCKER_IMAGE_NAME}:latest"
-                        sh "docker push mamir32825/${DOCKER_IMAGE_NAME}:latest"
+                        sh "docker build -t tetrisv1 ."
+                        sh "docker tag tetrisv1 mamir32825/tetrisv1:latest"
+                        sh "docker push mamir32825/tetrisv1:latest"
                     }
                 }
             }
@@ -79,7 +79,7 @@ pipeline {
         stage('TRIVY Image Scan') {
             steps {
                 // Perform TRIVY image scan
-                sh "trivy image mamir32825/${DOCKER_IMAGE_NAME}:latest > trivyimage.txt"
+                sh "trivy image mamir32825/tetrisv1:latest > trivyimage.txt"
             }
         }
         
@@ -89,7 +89,7 @@ pipeline {
                     def creds = gitUsernamePassword(credentialsId: 'github', gitToolName: 'Default')
                     if (creds) {
                         withCredentials([creds]) {
-                            def NEW_IMAGE_NAME = "mamir32825/${DOCKER_IMAGE_NAME}:latest"
+                            def NEW_IMAGE_NAME = "mamir32825/tetrisv1:latest"
                             sh "sed -i 's|image: .*|image: ${NEW_IMAGE_NAME}|' deployment.yml"
                             sh 'git add deployment.yml'
                             sh "git commit -m 'Update deployment image to ${NEW_IMAGE_NAME}'"
