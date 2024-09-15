@@ -40,8 +40,7 @@ pipeline {
         
         stage('Install Dependencies') {
             steps {
-                // Install npm dependencies using 'npm ci' for faster and consistent installs
-                sh "npm ci --prefer-offline"
+                sh "npm install"
             }
         }
         
