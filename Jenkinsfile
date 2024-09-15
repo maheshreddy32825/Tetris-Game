@@ -4,8 +4,6 @@ pipeline {
     tools {
         jdk 'jdk17'
         nodejs 'node16'
-        // Define SonarQube scanner tool
-        sonarqube 'sonar-scanner'
     }
     
     environment {
