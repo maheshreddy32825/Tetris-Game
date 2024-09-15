@@ -1,86 +1,92 @@
-pipeline{
+pipeline {
     agent any
-    tools{
+    
+    tools {
         jdk 'jdk17'
         nodejs 'node16'
     }
+    
     environment {
-        SCANNER_HOME=tool 'sonar-scanner'
+        SCANNER_HOME = tool 'sonar-scanner'
         GIT_REPO_NAME = "Tetris-deployment-file"
-        GIT_USER_NAME = "maheshreddy32825"      
+        GIT_USER_NAME = "maheshreddy32825"
     }
+    
     stages {
-        stage('clean workspace'){
-            steps{
+        stage('Clean workspace') {
+            steps {
                 cleanWs()
             }
         }
-        stage('Checkout from Git'){
-            steps{
+        
+        stage('Checkout from Git') {
+            steps {
                 git branch: 'main', url: 'https://github.com/maheshreddy32825/Tetris-Game.git'
             }
         }
-        stage("Sonarqube Analysis "){
-            steps{
+        
+        stage('SonarQube Analysis') {
+            steps {
                 withSonarQubeEnv('sonar-server') {
-                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=tetris \
-                    -Dsonar.projectKey=tetris '''
+                    sh "$SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=tetris -Dsonar.projectKey=tetris"
                 }
             }
         }
-        stage("quality gate"){
-           steps {
+        
+        stage('Quality Gate') {
+            steps {
                 script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token' 
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token'
                 }
-            } 
+            }
         }
+        
         stage('Install Dependencies') {
             steps {
                 sh "npm install"
             }
         }
-        stage('OWASP FS SCAN') {
+        
+        stage('OWASP Dependency-Check') {
             steps {
                 dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
-        stage('TRIVY FS SCAN') {
+        
+        stage('TRIVY Filesystem Scan') {
             steps {
                 sh "trivy fs . > trivyfs.txt"
             }
         }
-        stage("Docker Build & Push"){
-            steps{
-                script{
-                   withDockerRegistry(credentialsId: 'docker', toolName: 'docker'){   
-                       sh "docker build -t tetrisv1 ."
-                       sh "docker tag tetrisv1 mamir32825/tetrisv1:latest "
-                       sh "docker push mamir32825/tetrisv1:latest "
+        
+        stage('Docker Build & Push') {
+            steps {
+                script {
+                    withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
+                        sh "docker build -t tetrisv1 ."
+                        sh "docker tag tetrisv1 mamir32825/tetrisv1:latest"
+                        sh "docker push mamir32825/tetrisv1:latest"
                     }
                 }
             }
         }
-        stage("TRIVY"){
-            steps{
-                sh "trivy image mamir32825/tetrisv1:latest > trivyimage.txt" 
-            }
-        }
-        stage('Checkout Code') {
+        
+        stage('TRIVY Image Scan') {
             steps {
-                git branch: 'main', url: 'https://github.com/maheshreddy32825/Tetris-Game.git'
+                sh "trivy image mamir32825/tetrisv1:latest > trivyimage.txt"
             }
         }
+        
         stage('Update Deployment File') {
             steps {
                 script {
                     withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
-                       NEW_IMAGE_NAME = "mamir32825/tetrisv1:latest"  
-                       sh "sed -i 's|image: .*|image: $NEW_IMAGE_NAME|' deployment.yml"
-                       sh 'git add deployment.yml'
-                       sh "git commit -m 'Update deployment image to $NEW_IMAGE_NAME'"
-                       sh "git push @github.com/${GIT_USER_NAME}/${GIT_REPO_NAME">https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main"
+                        def NEW_IMAGE_NAME = "mamir32825/tetrisv1:latest"
+                        sh "sed -i 's|image: .*|image: $NEW_IMAGE_NAME|' deployment.yml"
+                        sh 'git add deployment.yml'
+                        sh "git commit -m 'Update deployment image to $NEW_IMAGE_NAME'"
+                        sh "git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main"
                     }
                 }
             }
