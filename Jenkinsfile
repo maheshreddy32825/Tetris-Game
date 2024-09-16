@@ -66,31 +66,14 @@ pipeline {
         stage('Update Deployment File') {
             steps {
                 script {
-                    // Retrieve GitHub credentials
-                    def creds = credentials('github')
-                    
-                    if (creds) {
-                        withCredentials([usernamePassword(credentialsId: creds.id, usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                            // Define the new image name
-                            def NEW_IMAGE_NAME = "mamir32825/tetrisv1:latest"
-                            
-                            // Debug print to verify the values are correctly set
-                            echo "NEW_IMAGE_NAME: ${NEW_IMAGE_NAME}"
-                            echo "GIT_USER_NAME: ${env.GIT_USER_NAME}"
-                            echo "GIT_REPO_NAME: ${env.GIT_REPO_NAME}"
-                            
-                            // Update deployment.yml with the new image name
-                            sh "sed -i 's|image: .*|image: ${NEW_IMAGE_NAME}|' deployment.yml"
-                            
-                            // Stage and commit changes
-                            sh 'git add .'
-                            sh "git commit -m 'Update deployment image to ${NEW_IMAGE_NAME}'"
-                            
-                            // Push changes to GitHub
-                            sh "git push https://${USERNAME}:${PASSWORD}@github.com/${env.GIT_USER_NAME}/${env.GIT_REPO_NAME} HEAD:main"
-                        }
-                    } else {
-                        error "Failed to retrieve GitHub credentials."
+                    withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                        NEW_IMAGE_NAME = "mamir32825/tetrisv1:latest"  
+                        sh "sed -i 's|image: .*|image: ${NEW_IMAGE_NAME}|' deployment.yml"
+                        git config --global user.name "${GIT_USERNAME}"
+                        git config --global user.password "${GIT_PASSWORD}"
+                        sh 'git add .'
+                        sh "git commit -m 'Update deployment image to ${NEW_IMAGE_NAME}'"
+                        sh "git push origin main"                    
                     }
                 }
             }
