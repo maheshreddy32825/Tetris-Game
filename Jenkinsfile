@@ -64,23 +64,24 @@ pipeline {
         }
 
         stage('Update Deployment File') {
-            steps {
-                script {
-                    def creds = gitUsernamePassword(credentialsId: 'github', gitToolName: 'Default')
-                    if (creds) {
-                    withCredentials([creds]) {
-                        NEW_IMAGE_NAME = "mamir32825/tetrisv1:latest"
-                        sh "sed -i 's|image: .*|image: ${NEW_IMAGE_NAME}|' deployment.yml"
-                        sh 'git add .'
-                        sh "git commit -m 'Update deployment image to ${NEW_IMAGE_NAME}'"
-                        sh "git push https://${creds.username}:${creds.password}@github.com/${env.GIT_USER_NAME}/${env.GIT_REPO_NAME} HEAD:main"
-                    }
-                    }else {
-                        error "Failed to retrieve GitHub credentials."
-                    }
+    steps {
+        script {
+            def creds = gitUsernamePassword(credentialsId: 'github', gitToolName: 'Default')
+            if (creds) {
+                withCredentials([creds]) {
+                    def NEW_IMAGE_NAME = "mamir32825/tetrisv1:latest"
+                    sh "sed -i 's|image: .*|image: ${NEW_IMAGE_NAME}|' deployment.yml"
+                    sh 'git add .'
+                    sh "git commit -m 'Update deployment image to ${NEW_IMAGE_NAME}'"
+                    sh "git push https://${creds.username}:${creds.password}@github.com/${env.GIT_USER_NAME}/${env.GIT_REPO_NAME} HEAD:main"
                 }
+            } else {
+                error "Failed to retrieve GitHub credentials."
             }
         }
+    }
+}
+
     }
     
 }
