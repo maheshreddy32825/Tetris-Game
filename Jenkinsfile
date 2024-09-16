@@ -49,7 +49,7 @@ pipeline {
                 sh "npm install"
             }
         }
-        ###
+        
         // stage('Security Scans') {
             parallel {
                 stage('OWASP Dependency-Check') {
@@ -68,7 +68,7 @@ pipeline {
                 }
             }
         }
-        ####
+        
         stage('Docker Build & Push') {
             steps {
                 script {
@@ -81,14 +81,14 @@ pipeline {
                 }
             }
         }
-        ####
+        
         // stage('TRIVY Image Scan') {
             steps {
                 // Perform TRIVY image scan
                 sh "trivy image mamir32825/tetrisv1:latest > trivyimage.txt"
             }
         }
-        ###
+        
         stage('Update Deployment File') {
             steps {
                 script {
