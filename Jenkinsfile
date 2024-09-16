@@ -1,5 +1,9 @@
 pipeline {
     agent any
+
+    options {
+        skipDefaultCheckout() // Disable default SCM checkout
+    }
     
     tools {
         jdk 'jdk17'
@@ -22,13 +26,13 @@ pipeline {
                 cleanWs()
             }
         }
-        /*
+        
         stage('Checkout from Git'){
             steps{
                 git branch: 'main', url: 'https://github.com/maheshreddy32825/Tetris-Game.git'
             }
         }
-        */
+        
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('sonar-server') {
