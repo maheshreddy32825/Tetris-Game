@@ -95,7 +95,7 @@ pipeline {
                     withCredentials([gitUsernamePassword(credentialsId: 'github', gitToolName: 'Default')]){
                         NEW_IMAGE_NAME = "mamir32825/tetrisv1:latest"
                         sh "sed -i 's|image: .*|image: ${NEW_IMAGE_NAME}|' deployment.yml"
-                        sh 'git add deployment.yml'
+                        sh 'git add .'
                         sh "git commit -m 'Update deployment image to ${NEW_IMAGE_NAME}'"
                         sh "git push https://${GIT_USER_NAME}:${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:main"
                     }
