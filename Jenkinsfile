@@ -22,13 +22,13 @@ pipeline {
                 cleanWs()
             }
         }
-        
+        /*
         stage('Checkout from Git'){
             steps{
                 git branch: 'main', url: 'https://github.com/maheshreddy32825/Tetris-Game.git'
             }
         }
-        
+        */
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('sonar-server') {
@@ -89,9 +89,9 @@ pipeline {
                 script {
                     //withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                     sh "sed -i 's|image: .*|image: ${NEW_IMAGE_NAME}|' deployment.yml"
-                    sh 'git add .'
+                    sh 'git add deployment.yml'
                     sh "git commit -m 'Update deployment image to ${NEW_IMAGE_NAME}'"
-                    sh "git push https://${GITHUB_TOKEN}@github.com/maheshreddy32825/Tetris-Game.git main"                  
+                    sh 'git push https://${GITHUB_TOKEN}@github.com/maheshreddy32825/Tetris-Game.git main'                  
                 }
             }
         }
