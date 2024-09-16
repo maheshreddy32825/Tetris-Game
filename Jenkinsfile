@@ -12,6 +12,8 @@ pipeline {
         GIT_REPO_NAME = "Tetris-deployment-file"
         GIT_USER_NAME = "maheshreddy32825"
         DOCKER_IMAGE_NAME = 'tetrisv1'
+        NEW_IMAGE_NAME = "mamir32825/tetrisv1:latest"
+        GITHUB_TOKEN = credentials('github')  
     }
     
     stages {
@@ -66,15 +68,11 @@ pipeline {
         stage('Update Deployment File') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-                        NEW_IMAGE_NAME = "mamir32825/tetrisv1:latest"  
-                        sh "sed -i 's|image: .*|image: ${NEW_IMAGE_NAME}|' deployment.yml"
-                        git config --global user.name "${GIT_USERNAME}"
-                        git config --global user.password "${GIT_PASSWORD}"
-                        sh 'git add .'
-                        sh "git commit -m 'Update deployment image to ${NEW_IMAGE_NAME}'"
-                        sh "git push origin main"                    
-                    }
+                    //withCredentials([usernamePassword(credentialsId: 'github', usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                    sh "sed -i 's|image: .*|image: ${NEW_IMAGE_NAME}|' deployment.yml"
+                    sh 'git add .'
+                    sh "git commit -m 'Update deployment image to ${NEW_IMAGE_NAME}'"
+                    sh "git push https://${GITHUB_TOKEN}@github.com/maheshreddy32825/Tetris-Game.git main"                  
                 }
             }
         }
