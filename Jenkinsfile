@@ -100,11 +100,5 @@ pipeline {
             }
         }
     }
-    post {
-        always {
-            // Clean up workspace after pipeline execution
-            cleanWs()
-        }
-    }
     
 }
